@@ -65,6 +65,15 @@ CREATE TABLE order_details (
                                FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE
 );
 
+CREATE TABLE password_reset_token (
+                              id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                              token VARCHAR(255) NOT NULL,
+                              account_id INT UNIQUE,
+                              expiry_date DATETIME,
+                              CONSTRAINT fk_account FOREIGN KEY (account_id) REFERENCES accounts(id)
+);
+
+
 INSERT INTO accounts (username, password, email, full_name, phone, address, role)
 VALUES
     ('director', '$2a$10$FKYl3UH2R5DwG.e6VE2UL.LQ2llAj/UCDRU50cEtTa80pz6irfbHu', 'admin@samsung.com', 'Admin Samsung', '0123456789', 'Hà Nội, Việt Nam', 'DIRECTOR'),

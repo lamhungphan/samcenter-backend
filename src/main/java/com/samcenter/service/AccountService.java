@@ -8,4 +8,6 @@ public interface AccountService extends BaseService<Account, Integer, AccountReq
     Account findByUsername(String username);
     Account findByEmail(String email);
     void updatePassword(PasswordChangeRequest request);
+    void forgotPassword(String email);
+    void resetPassword(String s, String newPassword);
 }

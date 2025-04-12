@@ -2,6 +2,7 @@ package com.samcenter.controller;
 
 import com.samcenter.controller.request.AccountRequest;
 import com.samcenter.controller.request.PasswordChangeRequest;
+import com.samcenter.controller.request.ResetPasswordRequest;
 import com.samcenter.controller.response.AccountResponse;
 import com.samcenter.controller.response.ApiResponse;
 import com.samcenter.controller.response.PageResponse;
@@ -74,10 +75,29 @@ public class AccountController {
         return ResponseEntity.ok(ApiResponse.success(null, "Account updated successfully"));
     }
 
+    @Operation(summary = "Forgot Password", description = "Send reset password email to user")
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(@RequestParam String email) {
+        log.info("forgot password for email: {}", email);
+
+        accountService.forgotPassword(email);
+        return ResponseEntity.ok(ApiResponse.success(null, "Reset password link sent to your email"));
+    }
+
+    @Operation(summary = "Reset Password", description = "Reset password by token")
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+        log.info("reset password");
+
+        accountService.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok(ApiResponse.success(null, "Password reset successfully"));
+    }
+
     @Operation(summary = "Change Password", description = "API change password for user to database")
     @PatchMapping("/change-password")
     public ResponseEntity<ApiResponse<Void>> changePassword(@RequestBody @Valid PasswordChangeRequest request) {
         log.info("change password");
+
         accountService.updatePassword(request);
         return ResponseEntity.ok(ApiResponse.success(null, "Account change password successfully"));
     }

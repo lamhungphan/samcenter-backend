@@ -32,7 +32,7 @@ public class AppConfig {
     private final UserServiceDetail userServiceDetail;
 
     @Value("${cors.allowed-origins}")
-    private String apiFrontend;
+    private String frontend_url;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -61,7 +61,7 @@ public class AppConfig {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(apiFrontend)
+                        .allowedOrigins(frontend_url)
                         .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE")
                         .allowedHeaders("*")
                         .allowCredentials(false)
