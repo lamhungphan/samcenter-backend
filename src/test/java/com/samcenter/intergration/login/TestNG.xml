@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<suite name="Suite example" parallel="classes" thread-count="2">
+    <test name="Testing">
+        <classes>
+            <class name="com.samcenter.intergration.login.LoginTestAdmin"/>
+            <class name="com.samcenter.intergration.login.LoginTestUser"/>
+        </classes>
+    </test>
+</suite>

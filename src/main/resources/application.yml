@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        ddl-auto: nonee
+    show-sql: true
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGIN}
+
+openapi:
+  service:
+    api-docs: samcenter-backend
+    server: http://localhost:8080
+    title: Backend
+    version: 1.0.0
+
+jwt:
+  expiryMinutes: ${JWT_EXPIRY_MINUTES}
+  expiryDay: ${JWT_EXPIRY_DAY}
+  accessKey: ${JWT_ACCESS_KEY}
+  refreshKey: ${JWT_REFRESH_KEY}
