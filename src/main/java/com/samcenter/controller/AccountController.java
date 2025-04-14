@@ -15,10 +15,16 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/account")
@@ -111,4 +117,15 @@ public class AccountController {
         accountService.delete(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Account deleted successfully"));
     }
+
+//    @GetMapping("/info")
+//    public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal Jwt jwt) {
+//        if (jwt == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//
+//        Map<String, Object> data = new HashMap<>();
+//        data.put("id", jwt.getClaim("id"));
+//        data.put("username", jwt.getClaim("sub"));
+//        data.put("role", jwt.getClaim("role"));
+//        return ResponseEntity.ok(ApiResponse.success(data, "Account info successfully"));
+//    }
 }

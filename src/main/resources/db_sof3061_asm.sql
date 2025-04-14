@@ -142,3 +142,5 @@ FROM orders;
 
 SELECT *
 FROM order_details;
+
+SELECT * FROM password_reset_token;

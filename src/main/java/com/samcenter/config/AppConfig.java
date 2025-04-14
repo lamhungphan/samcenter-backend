@@ -1,11 +1,14 @@
 package com.samcenter.config;
 
+import com.samcenter.service.OAuth2SuccessHandler;
+import com.samcenter.service.OAuth2UserService;
 import com.samcenter.service.UserServiceDetail;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -17,6 +20,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -30,6 +34,8 @@ public class AppConfig {
     private final String[] whitelistedUrls = {"/auth/**"};
     private final CustomizeRequestFilter requestFilter;
     private final UserServiceDetail userServiceDetail;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2UserService oAuth2UserService;
 
     @Value("${cors.allowed-origins}")
     private String frontend_url;
@@ -39,9 +45,25 @@ public class AppConfig {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(request -> request.requestMatchers("/**").permitAll()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/**").permitAll()
                         .requestMatchers("/checkout").authenticated()
-                        .anyRequest().authenticated())
+                        .anyRequest().permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(oAuth2UserService)
+                        )
+                        .successHandler(oAuth2SuccessHandler)
+                )
+                .logout(logout -> logout
+                        .logoutSuccessUrl(frontend_url)
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                )
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(requestFilter, UsernamePasswordAuthenticationFilter.class);

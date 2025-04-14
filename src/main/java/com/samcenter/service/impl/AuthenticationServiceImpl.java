@@ -62,21 +62,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Account account = accountRepository.findByUsername(request.getUsername());
 
         // Tạo token
-        String accessToken = jwtService.generateAccessToken(request.getUsername(), authorities);
-        String refreshToken = jwtService.generateRefreshToken(request.getUsername(), authorities);
+        String accessToken = jwtService.generateAccessToken(request.getUsername(), account.getId(), authorities);
+        String refreshToken = jwtService.generateRefreshToken(request.getUsername(), account.getId(), authorities);
 
-        // Map sang AccountResponse
-        AccountResponse accountResponse = AccountResponse.builder()
-                .id(account.getId())
-                .username(account.getUsername())
-                .email(account.getEmail())
-                .build();
+//        // Map sang AccountResponse
+//        AccountResponse accountResponse = AccountResponse.builder()
+//                .id(account.getId())
+//                .username(account.getUsername())
+//                .email(account.getEmail())
+//                .build();
 
         // Trả kết quả
         return TokenResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .account(accountResponse)
                 .build();
     }
 
@@ -98,16 +97,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             user.getAuthorities().forEach(authority -> authorities.add(authority.getAuthority()));
 
             // generate new access token
-            String accessToken = jwtService.generateAccessToken(user.getUsername(), authorities);
+            String accessToken = jwtService.generateAccessToken(user.getUsername(), user.getId(), authorities);
 
             return TokenResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(request)
-                    .account(AccountResponse.builder()
-                            .id(user.getId())
-                            .username(user.getUsername())
-                            .email(user.getEmail())
-                            .build())
                     .build();
         } catch (Exception e) {
             log.error("Access denied! errorMessage: {}", e.getMessage());

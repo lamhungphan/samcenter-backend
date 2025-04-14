@@ -12,5 +12,4 @@ import java.io.Serializable;
 public class TokenResponse implements Serializable {
     private String accessToken;
     private String refreshToken;
-    private AccountResponse account;
 }

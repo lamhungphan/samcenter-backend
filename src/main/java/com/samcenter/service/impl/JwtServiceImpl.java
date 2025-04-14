@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -33,22 +34,27 @@ public class JwtServiceImpl implements JwtService {
     private String refreshKey;
 
     @Override
-    public String generateAccessToken(String username, List<String> authorities) {
-        log.info("Generating Access Token for user: {} with roles: {}", username, authorities);
-        return generateToken(username, authorities, TokenType.ACCESS_TOKEN);    }
+    public String generateAccessToken(String username, Integer id, List<String> authorities) {
+        log.info("Generating Access Token for user: {}, id: {} with roles: {}", username, id, authorities);
+        return generateToken(username, id, authorities, TokenType.ACCESS_TOKEN);
+    }
 
     @Override
-    public String generateRefreshToken(String username, List<String> authorities) {
-        log.info("Generating Refresh Token for user: {} with roles: {}", username, authorities);
-        return generateToken(username, authorities, TokenType.REFRESH_TOKEN);    }
+    public String generateRefreshToken(String username, Integer id, List<String> authorities) {
+        log.info("Generating Refresh Token for user: {}, id: {} with roles: {}", username, id, authorities);
+        return generateToken(username, id, authorities, TokenType.REFRESH_TOKEN);
+    }
 
     @Override
     public String extractUsername(String token, TokenType type) {
         return extractClaim(token, type, Claims::getSubject);
     }
 
-    private String generateToken(String username, List<String> authorities, TokenType type) {
-        Map<String, Object> claims = Map.of("role", authorities); // them id vao token
+    private String generateToken(String username, Integer userId, List<String> authorities, TokenType type) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", authorities);
+        claims.put("id", userId);
+
         Date now = new Date();
         Date expiration = new Date(now.getTime() + getExpirationTime(type));
 
