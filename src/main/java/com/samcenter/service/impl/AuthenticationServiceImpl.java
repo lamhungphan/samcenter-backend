@@ -18,6 +18,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -60,17 +61,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         // Lấy thông tin account
         Account account = accountRepository.findByUsername(request.getUsername());
+        if (account == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
 
         // Tạo token
         String accessToken = jwtService.generateAccessToken(request.getUsername(), account.getId(), authorities);
         String refreshToken = jwtService.generateRefreshToken(request.getUsername(), account.getId(), authorities);
-
-//        // Map sang AccountResponse
-//        AccountResponse accountResponse = AccountResponse.builder()
-//                .id(account.getId())
-//                .username(account.getUsername())
-//                .email(account.getEmail())
-//                .build();
 
         // Trả kết quả
         return TokenResponse.builder()

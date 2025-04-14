@@ -29,8 +29,8 @@ public class AccountServiceImpl extends AbstractService<Account, Integer, Accoun
 
     private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
-    private PasswordResetTokenRepository tokenRepository;
-    private JavaMailSender mailSender;
+    private final PasswordResetTokenRepository tokenRepository;
+    private final JavaMailSender mailSender;
 
     public AccountServiceImpl(AccountRepository accountRepository,
                               PasswordEncoder passwordEncoder,
@@ -129,16 +129,31 @@ public class AccountServiceImpl extends AbstractService<Account, Integer, Accoun
 
 
     @Override
-    public void update(AccountRequest request) {
+    public Account save(Account account) {
+        // Kiểm tra xem username đã tồn tại chưa
+        if (accountRepository.existsByUsername(account.getUsername())) {
+            throw new RuntimeException("Username already exists");
+        }
 
+        // Kiểm tra xem email đã tồn tại chưa
+        if (accountRepository.existsByEmail(account.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        // Mã hóa mật khẩu
+        account.setPassword(passwordEncoder.encode(account.getPassword()));
+
+        // Gán role mặc định là CUSTOMER (hoặc có thể thay đổi nếu cần)
+        if (account.getRole() == null) {
+            account.setRole(Role.CUSTOMER);
+        }
+
+        // Lưu account vào cơ sở dữ liệu và trả về đối tượng vừa lưu
+        return super.save(account);
     }
 
     @Override
-    public Account save(Account account) {
-        account.setRole(Role.CUSTOMER);
-        if (account.getPassword() != null) {
-            account.setPassword(passwordEncoder.encode(account.getPassword()));
-        }
-        return super.save(account);
+    public void update(AccountRequest request) {
+
     }
 }

@@ -1,50 +1,77 @@
 package com.samcenter.unit;
 
 import com.samcenter.entity.Account;
-import com.samcenter.entity.Role;
-import com.samcenter.service.AccountService;
+import com.samcenter.repository.AccountRepository;
+import com.samcenter.service.impl.AccountServiceImpl;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class TestRegister {
 
-    @Autowired
-    private AccountService accountService;
+    @Mock
+    private AccountRepository accountRepository;
+
+    @InjectMocks
+    private AccountServiceImpl accountService;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @Test
     void testRegisterSuccess() {
-        Account request = new Account();
-        request.setUsername("newuser");
-        request.setPassword("123");
-        request.setEmail("newuser@example.com");
-        request.setFullName("New User");
-        request.setPhone("0987654301");
-        request.setAddress("HN");
-        request.setRole(Role.CUSTOMER);
+        Account newAccount = new Account();
+        newAccount.setUsername("newuser");
+        newAccount.setEmail("new@example.com");
+        newAccount.setPassword("password");
 
-        assertDoesNotThrow(() -> {
-            accountService.save(request);
-        });
+        // Mock các phương thức trả về boolean đúng kiểu
+        when(accountRepository.existsByUsername("newuser")).thenReturn(false); // Chưa có user này
+        when(accountRepository.existsByEmail("new@example.com")).thenReturn(false); // Chưa có email này
+        when(passwordEncoder.encode("password")).thenReturn("encoded-password");
+        when(accountRepository.save(any(Account.class))).thenReturn(newAccount);
+
+        // Gọi phương thức save từ AccountService
+        Account savedAccount = accountService.save(newAccount);
+
+        // Kiểm tra kết quả
+        assertNotNull(savedAccount);
+        assertEquals("encoded-password", savedAccount.getPassword());
+        verify(accountRepository).save(newAccount); // Kiểm tra gọi phương thức save
     }
 
     @Test
     void testRegisterDuplicateUsername() {
-        Account request = new Account();
-        request.setUsername("staff");
-        request.setPassword("any");
-        request.setEmail("duplicate@example.com");
-        request.setFullName("Dup User");
-        request.setPhone("0000000000");
-        request.setAddress("HCM");
-        request.setRole(Role.CUSTOMER);
+        Account account = new Account();
+        account.setUsername("existingUser");
+        account.setEmail("any@example.com");
 
-        assertThrows(RuntimeException.class, () -> {
-            accountService.save(request);
-        });
+        // Mock để giả lập username đã tồn tại
+        when(accountRepository.existsByUsername("existingUser")).thenReturn(true); // User đã tồn tại
+
+        assertThrows(RuntimeException.class, () -> accountService.save(account)); // Lỗi nếu username đã tồn tại
     }
+
+    @Test
+    void testRegisterDuplicateEmail() {
+        Account account = new Account();
+        account.setUsername("newuser");
+        account.setEmail("existingEmail@example.com");
+
+        // Mock để giả lập email đã tồn tại
+        when(accountRepository.existsByUsername("newuser")).thenReturn(false); // Username chưa tồn tại
+        when(accountRepository.existsByEmail("existingEmail@example.com")).thenReturn(true); // Email đã tồn tại
+
+        assertThrows(RuntimeException.class, () -> accountService.save(account)); // Lỗi nếu email đã tồn tại
+    }
+
 }
