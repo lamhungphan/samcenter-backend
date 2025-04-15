@@ -3,8 +3,8 @@
 <suite name="Suite example" parallel="classes" thread-count="2">
     <test name="Testing">
         <classes>
-            <class name="com.samcenter.intergration.login.LoginTestAdmin"/>
-            <class name="com.samcenter.intergration.login.LoginTestUser"/>
+            <class name="com.samcenter.intergration.login.TestLoginAdmin"/>
+            <class name="com.samcenter.intergration.login.TestLogin"/>
         </classes>
     </test>
 </suite>
